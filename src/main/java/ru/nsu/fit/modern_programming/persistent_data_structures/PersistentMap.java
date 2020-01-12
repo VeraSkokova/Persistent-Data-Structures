@@ -30,6 +30,9 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
+        if (key == null) {
+            throw new NullPointerException();
+        }
         return versions.get(currentVersion).find((K) key);
     }
 
