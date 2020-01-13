@@ -23,5 +23,7 @@ public class Main {
         AvlTree<Integer, Integer> secondTree = persistentTree.insert(2, 2);
         AvlTree<Integer, Integer> thirdTree = secondTree.insert(0, 0);
         System.out.println(thirdTree.getHeight());
+
+        System.out.println("The end of program");
     }
 }

@@ -39,9 +39,14 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
     @Override
     public V put(K key, V value) {
         V old = get(key);
-        PersistentAvlTree<K, V> latestVersion = versions.get(currentVersion);
-        PersistentAvlTree<K, V> newVersion = latestVersion.insert(key, value);
-        versions.add(newVersion);
+        PersistentAvlTree<K, V> latestVersion = currentVersion != 0 ? versions.get(currentVersion) : null;
+        if (latestVersion != null) {
+            PersistentAvlTree<K, V> newVersion = latestVersion.insert(key, value);
+            versions.add(newVersion);
+        } else {
+            latestVersion = new PersistentAvlTree<>(key, value);
+            versions.add(latestVersion);
+        }
         currentVersion++;
         return old;
     }
