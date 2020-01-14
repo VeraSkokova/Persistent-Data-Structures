@@ -5,7 +5,9 @@ public class PersistentBitTrie<T> extends BitTrie<T> {
     public PersistentBitTrie<T> insert(int index, T value) {
         PersistentBitTrie<T> result = new PersistentBitTrie<>();
         result.shift = shift;
-        result.root = this.root;
+        result.root = new Object[WIDTH];
+
+        System.arraycopy(root, 0, result.root, 0, WIDTH);
 
         Object[] prev = result.root;
         Object[] next;
@@ -17,6 +19,13 @@ public class PersistentBitTrie<T> extends BitTrie<T> {
                 result.shift += BITS;
                 prev = result.root;
             }
+        } else {
+            if ((prev[(index >>> this.shift) & MASK] != null) && ((index >>> this.shift) & MASK) != index) {
+                result.shift += BITS;
+                result.root = new Object[WIDTH];
+                result.root[0] = prev;
+                prev = result.root;
+            }
         }
 
         for (int level = result.shift; level > 0; level -= BITS) {
@@ -24,12 +33,12 @@ public class PersistentBitTrie<T> extends BitTrie<T> {
             if (next == null) {
                 next = new Object[WIDTH];
                 prev[(index >>> level) & MASK] = next;
+                result.size = size + 1;
             }
             prev = next;
         }
         prev[index & MASK] = value;
 
-        result.size = size + 1;
         return result;
     }
 }
