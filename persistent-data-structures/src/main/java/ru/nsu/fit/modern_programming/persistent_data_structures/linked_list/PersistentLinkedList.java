@@ -4,7 +4,9 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.PersistentCollec
 import ru.nsu.fit.modern_programming.persistent_data_structures.UndoRedo;
 import ru.nsu.fit.modern_programming.persistent_data_structures.VersionNode;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Stack;
+import java.util.UUID;
 
 public class PersistentLinkedList<E> implements PersistentList<E>, UndoRedo {
 
