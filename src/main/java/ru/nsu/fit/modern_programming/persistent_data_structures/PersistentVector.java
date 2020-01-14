@@ -5,7 +5,7 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.trie.PersistentB
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersistentVector<T> extends ArrayList<T> {
+public class PersistentVector<T> extends ArrayList<T> implements UndoRedo {
     private List<PersistentBitTrie<T>> versions = new ArrayList<>();
     private int currentVersion = 0;
 
@@ -16,7 +16,7 @@ public class PersistentVector<T> extends ArrayList<T> {
 
     @Override
     public T get(int index) {
-        return (T) versions.get(currentVersion).lookup(index);
+        return (T) versions.get(currentVersion - 1).lookup(index);
     }
 
     @Override
@@ -39,5 +39,15 @@ public class PersistentVector<T> extends ArrayList<T> {
         PersistentBitTrie<T> firstVersion = latestVersion.insert(index, element);
         versions.add(firstVersion);
         currentVersion++;
+    }
+
+    @Override
+    public UndoRedo undo() {
+        return null;
+    }
+
+    @Override
+    public UndoRedo redo() {
+        return null;
     }
 }

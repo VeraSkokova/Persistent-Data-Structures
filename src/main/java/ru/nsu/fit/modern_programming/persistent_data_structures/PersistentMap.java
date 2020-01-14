@@ -4,7 +4,7 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.avl_tree.Persist
 
 import java.util.*;
 
-public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
+public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V>, UndoRedo {
     private List<PersistentAvlTree<K, V>> versions = new ArrayList<>();
     private int currentVersion = 0;
 
@@ -78,6 +78,16 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
 
     @Override
     public Set<Entry<K, V>> entrySet() {
+        return null;
+    }
+
+    @Override
+    public UndoRedo undo() {
+        return null;
+    }
+
+    @Override
+    public UndoRedo redo() {
         return null;
     }
 }

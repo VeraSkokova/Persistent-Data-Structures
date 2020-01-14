@@ -13,11 +13,14 @@ public class PersistentBitTrie<T> extends BitTrie<T> {
         Object[] next;
 
         if (this.shift != 0) {
-            while (prev[(index >>> this.shift) & MASK] == null) {
+            while (index >= Math.pow(WIDTH, (result.shift + BITS) / BITS)) {
                 result.root = new Object[WIDTH];
                 result.root[0] = prev;
                 result.shift += BITS;
                 prev = result.root;
+            }
+            while (prev[(index >>> this.shift) & MASK] == null) {
+                result.root[(index >>> this.shift) & MASK] = new Object[WIDTH];
             }
         } else {
             if ((prev[(index >>> this.shift) & MASK] != null) && ((index >>> this.shift) & MASK) != index) {

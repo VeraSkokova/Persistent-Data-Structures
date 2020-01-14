@@ -16,10 +16,20 @@ public class BitTrie<V> {
         Object[] next;
 
         if (this.shift != 0) {
-            while (prev[(index >>> this.shift) & MASK] == null) {
+            while (index >= Math.pow(WIDTH, (this.shift + BITS) / BITS)) {
                 this.root = new Object[WIDTH];
                 this.root[0] = prev;
                 this.shift += BITS;
+                prev = this.root;
+            }
+            while (prev[(index >>> this.shift) & MASK] == null) {
+                this.root[(index >>> this.shift) & MASK] = new Object[WIDTH];
+            }
+        } else {
+            if ((prev[(index >>> this.shift) & MASK] != null) && ((index >>> this.shift) & MASK) != index) {
+                this.shift += BITS;
+                this.root = new Object[WIDTH];
+                this.root[0] = prev;
                 prev = this.root;
             }
         }
