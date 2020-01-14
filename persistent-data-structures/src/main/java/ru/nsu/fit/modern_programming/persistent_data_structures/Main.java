@@ -23,5 +23,20 @@ public class Main {
         AvlTree<Integer, Integer> secondTree = persistentTree.insert(2, 2);
         AvlTree<Integer, Integer> thirdTree = secondTree.insert(0, 0);
         System.out.println(thirdTree.getHeight());
+
+        PersistentVector<Integer> vector = new PersistentVector<>();
+
+        for (int i = 0; i < 1024 * 1024 + 1; i++) {
+            if (i == 1024) {
+                System.out.println("bug");
+            }
+            vector.add(i, i);
+        }
+
+        for (int i = 0; i < 64; i++) {
+            System.out.println("vector[" + i + "] = " + vector.get(i));
+        }
+
+        System.out.println("The end of program");
     }
 }
