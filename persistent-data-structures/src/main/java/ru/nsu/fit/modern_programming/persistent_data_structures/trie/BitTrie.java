@@ -49,7 +49,7 @@ public class BitTrie<V> {
         return this;
     }
 
-    public Object lookup(int index) {
+    public V lookup(int index) {
         Object[] node = this.root;
 
         // perform branching on internal nodes here
@@ -62,7 +62,7 @@ public class BitTrie<V> {
         }
 
         // Last element is the value we want to lookup, return it.
-        return node[index & MASK];
+        return (V) node[index & MASK];
     }
 
     public int getSize() {
