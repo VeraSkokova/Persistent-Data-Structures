@@ -177,7 +177,68 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
     @Override
     public PersistentList<E> remove(int index) {
-        throw new UnsupportedOperationException();
+        FatNode<E> newFirst = null, newLast = null, leftNode = null, rightNode = null;
+        FatNode<E> node = getNode(index);
+
+        FatNode<E> nextNotFull = getNextNotFull(node.getNode(version).next);
+
+        if (nextNotFull == null) {
+            Object[] curr = copy(node.getNode(version).next, last);
+            rightNode = (FatNode<E>) curr[0];
+            newLast = (FatNode<E>) curr[1];
+        }
+        else {
+            if (nextNotFull == node.getNode(version).next) {
+                rightNode = nextNotFull;
+            }
+            else {
+                Object[] curr = copy(node.getNode(version).next, nextNotFull.getNode(version).prev);
+                FatNode<E> first = (FatNode<E>) curr[0];
+                FatNode<E> last = (FatNode<E>) curr[1];
+                last.getNode(version + 1).next = nextNotFull;
+                nextNotFull.addNode(new Node<>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), version + 1);
+                rightNode = first;
+            }
+            newLast = last;
+        }
+
+        FatNode<E> prevNotFull = getPrevNotFull(node.getNode(version).prev);
+
+        if (prevNotFull == null) {
+            Object[] curr = copy(first, node.getNode(version).prev);
+            leftNode = (FatNode<E>) curr[1];
+            newFirst = (FatNode<E>) curr[0];
+        }
+        else {
+            if (prevNotFull == node.getNode(version).prev) {
+                leftNode = prevNotFull;
+            }
+            else {
+                Object[] curr = copy(prevNotFull.getNode(version).next, node.getNode(version).prev);
+                FatNode<E> first = (FatNode<E>) curr[0];
+                FatNode<E> last = (FatNode<E>) curr[1];
+                first.getNode(version + 1).prev = prevNotFull;
+                prevNotFull.addNode(new Node<>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), version + 1);
+                leftNode = last;
+            }
+            newFirst = first;
+        }
+
+        if (!leftNode.versions.containsKey(version + 1)) {
+            leftNode.addNode(new Node<>(leftNode.getNode(version).prev, leftNode.getNode(version).item, rightNode), version + 1);
+        }
+        else {
+            leftNode.getNode(version + 1).next = rightNode;
+        }
+
+        if (!rightNode.versions.containsKey(version + 1)) {
+            rightNode.addNode(new Node<>(leftNode, rightNode.getNode(version).item, rightNode.getNode(version).next), version + 1);
+        }
+        else {
+            rightNode.getNode(version + 1).prev = leftNode;
+        }
+
+        return new PersistentDoublyLinkedList<E>(version + 1, size - 1, newFirst, newLast);
     }
 
     @Override
