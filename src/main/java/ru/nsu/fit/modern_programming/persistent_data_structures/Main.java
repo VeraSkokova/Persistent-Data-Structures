@@ -31,11 +31,18 @@ public class Main {
 
         PersistentDoublyLinkedList<Double> list1 = new PersistentDoublyLinkedList<>();
         System.out.println(list1);
-        PersistentDoublyLinkedList<Double> list2 = new PersistentDoublyLinkedList<Double>(List.of(1.2, 2.6, 2.912));
+        PersistentDoublyLinkedList<Double> list2 = new PersistentDoublyLinkedList<Double>(List.of(1.2, 2.6, 2.912, -3.56, 10.22303, -228.7));
         Object[] array = list2.toArray();
         array[0] = -3.14;
         System.out.println(list2);
         System.out.println(Arrays.toString(list2.toArray()));
         System.out.println(Arrays.toString(array));
+        System.out.println(list2.get(0));
+        System.out.println(list2.get(1));
+        System.out.println(list2.get(2));
+        System.out.println(list2.get(3));
+        System.out.println(list2.get(4));
+        System.out.println(list2.get(5));
+//        System.out.println(list2.get(6)); // exception
     }
 }

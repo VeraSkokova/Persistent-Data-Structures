@@ -4,7 +4,7 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.PersistentCollec
 
 public interface PersistentList<E> extends PersistentCollection<E> {
 
-    PersistentList<E> add(E e, int index);
+    PersistentList<E> add(int index, E e);
 
     PersistentList<E> remove(int index);
 
