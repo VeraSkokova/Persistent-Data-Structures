@@ -1,5 +1,7 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
+import java.io.IOException;
+
 public interface PersistentCollection<E> extends Iterable<E> {
 
     boolean isEmpty();
