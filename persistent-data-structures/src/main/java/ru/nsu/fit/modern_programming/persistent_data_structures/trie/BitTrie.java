@@ -50,6 +50,12 @@ public class BitTrie<V> {
     }
 
     public V lookup(int index) {
+        // Last element is the value we want to lookup, return it.
+        Object[] node = this.lookupNodeByElementIndex(index);
+        return (V) node[index & MASK];
+    }
+
+    private Object[] lookupNodeByElementIndex(int index) {
         Object[] node = this.root;
 
         // perform branching on internal nodes here
@@ -60,13 +66,60 @@ public class BitTrie<V> {
                 return null;
             }
         }
+        return node;
+    }
 
-        // Last element is the value we want to lookup, return it.
-        return (V) node[index & MASK];
+    protected void shiftNodeToIndex(Object[] node, int index) {
+        for (int i = index; i < node.length - 1; i++) {
+            node[i] = node[i + 1];
+        }
+        node[node.length - 1] = null;
+    }
+
+    protected boolean checkAllNullNode(Object[] node) {
+        for (int i = 0; i < WIDTH; i++) {
+            if (node[i] != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public BitTrie<V> delete(int index) {
+        Object[] previousNode = lookupNodeByElementIndex(index);
+        if (previousNode == null) {
+            return this;
+        }
+        this.shiftNodeToIndex(previousNode, index & MASK);
+        index = (int)Math.ceil((double)(index + 1) / WIDTH) * WIDTH;
+        Object[] currentNode = lookupNodeByElementIndex(index);
+        while (currentNode != null) {
+            previousNode[MASK] = currentNode[0];
+            if (!this.checkAllNullNode(currentNode)) {
+                this.shiftNodeToIndex(currentNode, 0);
+            }
+            previousNode = currentNode;
+            index += WIDTH;
+            currentNode = lookupNodeByElementIndex(index);
+        }
+        return this;
     }
 
     public int getSize() {
         return size;
+    }
+
+    public Object[] toArray(int arraySize) {
+        Object[] result = new Object[arraySize];
+        int index = 0;
+        Object[] currentNode = lookupNodeByElementIndex(index);
+        while (currentNode != null) {
+            System.arraycopy(currentNode, 0, result, index, WIDTH);
+            index += WIDTH;
+            currentNode = lookupNodeByElementIndex(index);
+        }
+
+        return result;
     }
 }
 
