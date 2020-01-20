@@ -1,14 +1,14 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-import java.io.IOException;
-
-public interface PersistentCollection<E> {
+public interface PersistentCollection<E> extends Iterable<E> {
 
     boolean isEmpty();
 
     int size();
 
     PersistentCollection<E> add(E e);
+
+    PersistentCollection<E> remove(Object e);
 
     boolean equals(Object o);
 
