@@ -14,4 +14,7 @@ public interface PersistentCollection<E> {
 
     Object[] toArray();
 
+    E get(int index);
+
+    PersistentCollection<E> remove (int index);
 }
