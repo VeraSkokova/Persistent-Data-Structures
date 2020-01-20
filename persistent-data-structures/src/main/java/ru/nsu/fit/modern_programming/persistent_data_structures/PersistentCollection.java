@@ -1,14 +1,12 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-public interface PersistentCollection<E> extends Iterable<E> {
+public interface PersistentCollection<E> {
 
     boolean isEmpty();
 
     int size();
 
     PersistentCollection<E> add(E e);
-
-    PersistentCollection<E> remove(Object e);
 
     boolean equals(Object o);
 
