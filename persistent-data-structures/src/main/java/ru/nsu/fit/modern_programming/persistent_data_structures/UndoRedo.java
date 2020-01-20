@@ -4,4 +4,10 @@ public interface UndoRedo {
     UndoRedo undo();
 
     UndoRedo redo();
+
+    void registerUpdateListener(UpdateListener updateListener);
+
+    public interface UpdateListener {
+        void onUpdate(UndoRedo persistentDataStructure);
+    }
 }
