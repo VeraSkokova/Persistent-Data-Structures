@@ -3,14 +3,15 @@ package ru.nsu.fit.modern_programming.persistent_data_structures;
 import ru.nsu.fit.modern_programming.persistent_data_structures.avl_tree.PersistentAvlTree;
 import ru.nsu.fit.modern_programming.persistent_data_structures.tree.Tree;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V>, UndoRedo {
+public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
     private Tree<UUID, PersistentAvlTree<K, V>> versions;
-    private Tree<UUID, PersistentAvlTree<K, V>>.Node currentVersionNode;
-    private UUID currentVersion;
-
-    private Deque<Tree<UUID, PersistentAvlTree<K, V>>.Node> redoStack = new ArrayDeque<>();
+    Tree<UUID, PersistentAvlTree<K, V>>.Node currentVersionNode;
+    UUID currentVersion;
 
     @Override
     public int size() {
@@ -36,6 +37,9 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V>, Und
     public V get(Object key) {
         if (key == null) {
             throw new NullPointerException();
+        }
+        if (currentVersionNode == null) {
+            return null;
         }
         return currentVersionNode.getValue().find((K) key);
     }
@@ -87,26 +91,5 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V>, Und
     @Override
     public Set<Entry<K, V>> entrySet() {
         return null;
-    }
-
-    @Override
-    public UndoRedo undo() {
-        if (currentVersionNode.getParent() == null) {
-            return this;
-        }
-        redoStack.push(currentVersionNode);
-        currentVersionNode = currentVersionNode.getParent();
-        currentVersion = currentVersionNode.getKey();
-        return this;
-    }
-
-    @Override
-    public UndoRedo redo() {
-        if (redoStack.isEmpty()) {
-            return this;
-        }
-        currentVersionNode = redoStack.pop();
-        currentVersion = currentVersionNode.getKey();
-        return this;
     }
 }
