@@ -65,7 +65,16 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
 
     @Override
     public V remove(Object key) {
-        return null;
+        V old = get(key);
+        PersistentAvlTree<K, V> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
+        if (latestVersion != null) {
+            PersistentAvlTree<K, V> newVersion = latestVersion.delete((K)key);
+            currentVersion = UUID.randomUUID();
+            Tree<UUID, PersistentAvlTree<K, V>> temp = new Tree<>(currentVersion, newVersion);
+            currentVersionNode.addChild(temp.getRoot());
+            currentVersionNode = temp.getRoot();
+        }
+        return old;
     }
 
     @Override

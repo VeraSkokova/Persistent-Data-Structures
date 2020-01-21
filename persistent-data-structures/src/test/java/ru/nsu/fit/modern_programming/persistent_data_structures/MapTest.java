@@ -17,5 +17,22 @@ public class MapTest {
         Assert.assertEquals("Zero", map.get(0));
     }
 
+    @Test
+    public void testDelete() {
+        PersistentMap<Integer, String> map = new PersistentMap<>();
+
+        map.put(0, "Zero");
+        map.put(1, "First");
+
+        Assert.assertTrue(map.containsKey(0));
+
+        map.remove(0);
+
+        Assert.assertFalse(map.containsKey(0));
+        Assert.assertTrue(map.containsKey(1));
+
+        Assert.assertEquals("First", map.get(1));
+    }
+
 
 }

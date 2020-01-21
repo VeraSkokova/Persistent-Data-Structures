@@ -46,7 +46,10 @@ public class AvlTree<K extends Comparable<K>, V> {
         return this;
     }
 
-    private int getBalanceFactor() {
+    protected int getBalanceFactor() {
+        if (right == null && left == null) {
+            return 0;
+        }
         if (right == null) {
             return -left.getHeight();
         }
@@ -56,7 +59,7 @@ public class AvlTree<K extends Comparable<K>, V> {
         return right.getHeight() - left.getHeight();
     }
 
-    private void recountHeight() {
+    protected void recountHeight() {
         int heightLeft = left != null ? left.getHeight() : 0;
         int heightRight = right != null ? right.getHeight() : 0;
         this.height = (heightLeft > heightRight ? heightLeft : heightRight) + 1;
@@ -104,12 +107,15 @@ public class AvlTree<K extends Comparable<K>, V> {
             } else {
                 this.left = this.left.insert(anotherKey, value);
             }
-        } else {
+        } else if (key.compareTo(anotherKey) > 0) {
             if (this.right == null) {
                 this.right = new AvlTree<>(anotherKey, value);
             } else {
                 this.right = this.right.insert(anotherKey, value);
             }
+        } else {
+            this.value = value;
+            nodesCount--;
         }
         nodesCount++;
         return this.balance();
@@ -129,6 +135,73 @@ public class AvlTree<K extends Comparable<K>, V> {
             }
         }
         return null;
+    }
+
+    public AvlTree<K, V> delete(K key) {
+        if (this.find(key) == null) {
+            return this;
+        }
+        return this.delete(key, this);
+    }
+
+    protected AvlTree<K, V> minValueNode(AvlTree<K, V> node) {
+        AvlTree<K, V> current = node;
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
+    }
+
+    private AvlTree<K, V> delete(K key, AvlTree<K, V> root) {
+        if (root == null) {
+            return root;
+        }
+        int cmp = key.compareTo(root.key);
+        if (cmp < 0) {
+            root.left = this.delete(key, root.left);
+        } else if (cmp > 0) {
+            root.right = this.delete(key, root.right);
+        } else {
+            if ((root.left == null) || (root.right == null)) {
+                AvlTree<K, V> temp = null;
+                if (temp == root.left) {
+                    temp = root.right;
+                } else {
+                    temp = root.left;
+                }
+                if (temp == null) {
+                    temp = root;
+                    root = null;
+                } else {
+                    root = temp;
+                }
+            } else {
+                AvlTree<K, V> temp = minValueNode(root.right);
+                root.key = temp.key;
+                root.right = this.delete(temp.key, root.right);
+            }
+        }
+        if (root == null) {
+            return root;
+        }
+        root.nodesCount--;
+        root.recountHeight();
+        int balance = root.getBalanceFactor();
+        if (balance > 1 && root.left.getBalanceFactor() >= 0) {
+            return root.rotateRight();
+        }
+        if (balance > 1 && root.left.getBalanceFactor() < 0) {
+            root.left = root.left.rotateLeft();
+            return root.rotateRight();
+        }
+        if (balance < -1 && root.right.getBalanceFactor() <= 0) {
+            return root.rotateLeft();
+        }
+        if (balance < -1 && root.right.getBalanceFactor() > 0) {
+            root.right = root.right.rotateRight();
+            return root.rotateLeft();
+        }
+        return root;
     }
 
     public int itemsCount() {

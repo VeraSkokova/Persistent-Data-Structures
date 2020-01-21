@@ -44,4 +44,49 @@ public class PersistentBitTrie<T> extends BitTrie<T> {
 
         return result;
     }
+
+    private Object[] lookupNodeByElementIndex(int index, PersistentBitTrie<T> result) {
+        Object[] prevNode = result.root;
+        Object[] node = null;
+
+        // perform branching on internal nodes here
+        for (int level = this.shift; level > 0; level -= BITS) {
+            // If node may not exist, check if it is null here
+            if (prevNode[(index >>> level) & MASK] == null) {
+                return null;
+            }
+            node = new Object[WIDTH];
+            System.arraycopy((Object[]) prevNode[(index >>> level) & MASK], 0, node, 0, WIDTH);
+            prevNode[(index >>> level) & MASK] = node;
+            prevNode = node;
+        }
+        return node;
+    }
+
+    @Override
+    public PersistentBitTrie<T> delete(int index) {
+        PersistentBitTrie<T> result = new PersistentBitTrie<>();
+        result.shift = shift;
+        result.root = new Object[WIDTH];
+
+        System.arraycopy(root, 0, result.root, 0, WIDTH);
+
+        Object[] previousNode = lookupNodeByElementIndex(index, result);
+        if (previousNode == null) {
+            return result;
+        }
+        this.shiftNodeToIndex(previousNode, index & MASK);
+        index = (int)Math.ceil((double)(index + 1) / WIDTH) * WIDTH;
+        Object[] currentNode = lookupNodeByElementIndex(index, result);
+        while (currentNode != null) {
+            previousNode[MASK] = currentNode[0];
+            if (!this.checkAllNullNode(currentNode)) {
+                this.shiftNodeToIndex(currentNode, 0);
+            }
+            previousNode = currentNode;
+            index += WIDTH;
+            currentNode = lookupNodeByElementIndex(index, result);
+        }
+        return result;
+    }
 }

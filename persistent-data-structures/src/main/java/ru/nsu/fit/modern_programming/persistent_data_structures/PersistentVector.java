@@ -48,6 +48,20 @@ public class PersistentVector<T> extends ArrayList<T> {
 
 
     }
+
+    @Override
+    public T remove(int index) {
+        PersistentBitTrie<T> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
+        if (latestVersion != null) {
+            PersistentBitTrie<T> newVersion = latestVersion.delete(index);
+            currentVersion = UUID.randomUUID();
+            Tree<UUID, PersistentBitTrie<T>> temp = new Tree<>(currentVersion, newVersion);
+            currentVersionNode.addChild(temp.getRoot());
+            currentVersionNode = temp.getRoot();
+            return latestVersion.lookup(index);
+        }
+        return null;
+    }
 }
 
 //Каскадные обновления - обновлять версию у объемлющей структуры
