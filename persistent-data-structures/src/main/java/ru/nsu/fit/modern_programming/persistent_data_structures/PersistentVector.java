@@ -1,54 +1,64 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-import ru.nsu.fit.modern_programming.persistent_data_structures.tree.Tree;
+import ru.nsu.fit.modern_programming.persistent_data_structures.linked_list.PersistentList;
 import ru.nsu.fit.modern_programming.persistent_data_structures.trie.PersistentBitTrie;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.UUID;
+import java.util.Collections;
+import java.util.List;
 
-public class PersistentVector<T> extends ArrayList<T> {
-    private Tree<UUID, PersistentBitTrie<T>> versions;
-    Tree<UUID, PersistentBitTrie<T>>.Node currentVersionNode;
-    UUID currentVersion;
+public class PersistentVector<T> implements PersistentCollection<T> {
+    private PersistentBitTrie<T> persistentBitTrie;
 
-    private Deque<Tree<UUID, PersistentBitTrie<T>>.Node> redoStack = new ArrayDeque<>();
+    public PersistentVector() {
+        persistentBitTrie = new PersistentBitTrie<>();
+    }
+
+    public PersistentVector(PersistentBitTrie<T> persistentBitTrie) {
+        this.persistentBitTrie = persistentBitTrie;
+    }
 
     @Override
     public int size() {
-        return currentVersionNode.getValue().getSize();
+        return persistentBitTrie.getSize();
     }
 
     @Override
     public T get(int index) {
-        return (T) currentVersionNode.getValue().lookup(index);
+        return (T) persistentBitTrie.lookup(index);
     }
 
     @Override
-    public boolean add(T t) {
-        int lastIndex = versions == null ? 0 : currentVersionNode.getValue().getSize() - 1;
-        add(lastIndex, t);
-        return true;
+    public PersistentVector<T> add(T t) {
+        int lastIndex = persistentBitTrie.getSize() - 1;
+        return add(lastIndex, t);
+    }
+
+    public PersistentVector<T> add(int index, T element) {
+        PersistentBitTrie<T> newVersion = persistentBitTrie.insert(index, element);
+        return new PersistentVector<>(newVersion);
     }
 
     @Override
-    public void add(int index, T element) {
-        PersistentBitTrie<T> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
-        if (latestVersion != null) {
-            PersistentBitTrie<T> newVersion = latestVersion.insert(index, element);
-            currentVersion = UUID.randomUUID();
-            Tree<UUID, PersistentBitTrie<T>> temp = new Tree<>(currentVersion, newVersion);
-            currentVersionNode.addChild(temp.getRoot());
-            currentVersionNode = temp.getRoot();
+    public boolean isEmpty() {
+        return size() == 0;
+    }
 
-            return;
-        }
-        latestVersion = new PersistentBitTrie<>();
-        PersistentBitTrie<T> firstVersion = latestVersion.insert(index, element);
-        currentVersion = UUID.randomUUID();
-        versions = new Tree<>(currentVersion, firstVersion);
-        currentVersionNode = versions.getRoot();
+    @Override
+    public Object[] toArray() {
+        return persistentBitTrie.toArray(size());
+    }
+
+    public PersistentList<T> toPersistentList() {
+        List<T> elements = new ArrayList<>();
+        Collections.addAll(elements, (T[]) toArray());
+        return new PersistentDoublyLinkedList<>(elements);
+    }
+
+    @Override
+    public PersistentVector<T> remove(int index) {
+        PersistentBitTrie<T> newVersion = persistentBitTrie.delete(index);
+        return new PersistentVector<>(newVersion);
     }
 }
 
