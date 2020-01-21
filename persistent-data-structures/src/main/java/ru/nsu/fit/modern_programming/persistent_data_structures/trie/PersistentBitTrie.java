@@ -36,11 +36,14 @@ public class PersistentBitTrie<T> extends BitTrie<T> {
             if (next == null) {
                 next = new Object[WIDTH];
                 prev[(index >>> level) & MASK] = next;
-                result.size = size + 1;
             }
             prev = next;
         }
         prev[index & MASK] = value;
+
+        if (index > result.size) {
+            size = index + 1;
+        }
 
         return result;
     }

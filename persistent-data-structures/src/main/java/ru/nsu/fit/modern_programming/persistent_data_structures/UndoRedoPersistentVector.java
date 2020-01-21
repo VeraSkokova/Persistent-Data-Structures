@@ -15,8 +15,8 @@ public class UndoRedoPersistentVector<T> extends PersistentVector<T> implements 
     public UndoRedoPersistentVector() {
     }
 
-    public UndoRedoPersistentVector(Tree<UUID, PersistentBitTrie<T>> versions, Tree<UUID, PersistentBitTrie<T>>.Node currentVersionNode, UUID currentVersion) {
-        super(versions, currentVersionNode, currentVersion);
+    public UndoRedoPersistentVector(PersistentBitTrie<T> persistentBitTrie) {
+        super(persistentBitTrie);
     }
 
     @Override

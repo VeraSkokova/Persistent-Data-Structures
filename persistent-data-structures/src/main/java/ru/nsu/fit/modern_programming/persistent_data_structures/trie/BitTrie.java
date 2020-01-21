@@ -44,7 +44,9 @@ public class BitTrie<V> {
         }
         prev[index & MASK] = value;
 
-        size++;
+        if (index > size) {
+            size = index + 1;
+        }
 
         return this;
     }

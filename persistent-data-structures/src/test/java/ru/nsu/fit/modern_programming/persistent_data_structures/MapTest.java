@@ -8,8 +8,8 @@ public class MapTest {
     public void testMap() {
         PersistentMap<Integer, String> map = new PersistentMap<>();
 
-        map.put(0, "Zero");
-        map.put(1, "First");
+        map = map.put(0, "Zero");
+        map = map.put(1, "First");
 
         Assert.assertTrue(map.containsKey(0));
         Assert.assertTrue(map.containsKey(1));
