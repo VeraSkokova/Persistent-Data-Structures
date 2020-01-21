@@ -1,6 +1,5 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-import ru.nsu.fit.modern_programming.persistent_data_structures.linked_list.PersistentDoublyLinkedList;
 import ru.nsu.fit.modern_programming.persistent_data_structures.linked_list.PersistentList;
 import ru.nsu.fit.modern_programming.persistent_data_structures.trie.PersistentBitTrie;
 
