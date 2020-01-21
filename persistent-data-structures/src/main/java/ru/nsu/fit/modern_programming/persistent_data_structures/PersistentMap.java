@@ -3,15 +3,15 @@ package ru.nsu.fit.modern_programming.persistent_data_structures;
 import ru.nsu.fit.modern_programming.persistent_data_structures.avl_tree.PersistentAvlTree;
 import ru.nsu.fit.modern_programming.persistent_data_structures.tree.Tree;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
     private Tree<UUID, PersistentAvlTree<K, V>> versions;
     Tree<UUID, PersistentAvlTree<K, V>>.Node currentVersionNode;
     UUID currentVersion;
+    UUID previousVersion;
+    HashSet<K> keysChange;
+    PersistentAvlTree<K, V> oldMap;
 
     @Override
     public int size() {
@@ -46,6 +46,9 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
+        if (keysChange != null) {
+            keysChange.add(key);
+        }
         V old = get(key);
         PersistentAvlTree<K, V> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
         if (latestVersion != null) {
@@ -65,6 +68,9 @@ public class PersistentMap<K extends Comparable<K>, V> implements Map<K, V> {
 
     @Override
     public V remove(Object key) {
+        if (keysChange != null) {
+            keysChange.add((K)key);
+        }
         V old = get(key);
         PersistentAvlTree<K, V> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
         if (latestVersion != null) {

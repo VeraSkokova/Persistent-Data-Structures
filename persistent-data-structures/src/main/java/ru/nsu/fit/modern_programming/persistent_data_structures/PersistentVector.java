@@ -4,12 +4,17 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.tree.Tree;
 import ru.nsu.fit.modern_programming.persistent_data_structures.trie.PersistentBitTrie;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class PersistentVector<T> extends ArrayList<T> {
     private Tree<UUID, PersistentBitTrie<T>> versions;
     Tree<UUID, PersistentBitTrie<T>>.Node currentVersionNode;
     UUID currentVersion;
+    UUID previousVersion;
+    HashSet<Integer> indexesInsertion;
+    Integer indexDeletion;
+    PersistentBitTrie<T> oldVector;
 
     @Override
     public int size() {
@@ -30,6 +35,9 @@ public class PersistentVector<T> extends ArrayList<T> {
 
     @Override
     public void add(int index, T element) {
+        if (indexesInsertion != null) {
+            indexesInsertion.add(index);
+        }
         PersistentBitTrie<T> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
         if (latestVersion != null) {
             PersistentBitTrie<T> newVersion = latestVersion.insert(index, element);
@@ -51,6 +59,9 @@ public class PersistentVector<T> extends ArrayList<T> {
 
     @Override
     public T remove(int index) {
+        if (indexesInsertion != null) {
+            indexDeletion = indexDeletion == -1 ? index : Math.min(index, indexDeletion);
+        }
         PersistentBitTrie<T> latestVersion = currentVersionNode != null ? currentVersionNode.getValue() : null;
         if (latestVersion != null) {
             PersistentBitTrie<T> newVersion = latestVersion.delete(index);
