@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.UUID;
 
-public class PersistentVector<T> extends ArrayList<T> implements UndoRedo {
+public class PersistentVector<T> extends ArrayList<T> {
     private Tree<UUID, PersistentBitTrie<T>> versions;
-    private Tree<UUID, PersistentBitTrie<T>>.Node currentVersionNode;
-    private UUID currentVersion;
+    Tree<UUID, PersistentBitTrie<T>>.Node currentVersionNode;
+    UUID currentVersion;
 
     private Deque<Tree<UUID, PersistentBitTrie<T>>.Node> redoStack = new ArrayDeque<>();
 
@@ -50,25 +50,8 @@ public class PersistentVector<T> extends ArrayList<T> implements UndoRedo {
         versions = new Tree<>(currentVersion, firstVersion);
         currentVersionNode = versions.getRoot();
     }
-
-    @Override
-    public UndoRedo undo() {
-        if (currentVersionNode.getParent() == null) {
-            return this;
-        }
-        redoStack.push(currentVersionNode);
-        currentVersionNode = currentVersionNode.getParent();
-        currentVersion = currentVersionNode.getKey();
-        return this;
-    }
-
-    @Override
-    public UndoRedo redo() {
-        if (redoStack.isEmpty()) {
-            return this;
-        }
-        currentVersionNode = redoStack.pop();
-        currentVersion = currentVersionNode.getKey();
-        return this;
-    }
 }
+
+//Каскадные обновления - обновлять версию у объемлющей структуры
+//НЕзависимый undo stack у версий
+//Подумать про повороты дерева и копирование пути

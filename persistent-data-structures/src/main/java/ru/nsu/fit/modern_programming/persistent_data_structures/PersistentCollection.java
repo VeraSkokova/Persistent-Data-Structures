@@ -1,7 +1,5 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-import java.io.IOException;
-
 public interface PersistentCollection<E> {
 
     boolean isEmpty();
