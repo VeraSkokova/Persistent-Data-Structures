@@ -9,13 +9,14 @@ import java.util.HashSet;
 import java.util.UUID;
 
 public class UndoRedoPersistentMap<K extends Comparable<K>, V> extends PersistentMap<K, V> implements UndoRedo{
-    public UUID previousVersion;
-    public UUID currentVersion;
-    public HashSet<K> keysChange;
-    PersistentMap<K, V> oldMap;
-
     private Deque<Tree<UUID, PersistentMap<K, V>>.Node> redoStack = new ArrayDeque<>();
     private Tree<UUID, PersistentMap<K, V>> history;
+
+    UUID previousVersion;
+    UUID currentVersion;
+    HashSet<K> keysChange;
+    PersistentMap<K, V> oldMap;
+
     Tree<UUID, PersistentMap<K, V>>.Node node;
 
     public UndoRedoPersistentMap() {

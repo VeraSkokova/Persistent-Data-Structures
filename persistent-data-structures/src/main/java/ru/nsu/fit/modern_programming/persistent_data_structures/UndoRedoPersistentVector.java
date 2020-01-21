@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.UUID;
 
 public class UndoRedoPersistentVector<T> extends PersistentVector<T> implements UndoRedo {
-    public HashSet<Integer> indexesInsertion;
-    public int indexDeletion;
-    public PersistentVector<T> oldVector;
-    UUID currentVersion;
-    UUID previousVersion;
     private Deque<Tree<UUID, PersistentVector<T>>.Node> redoStack = new ArrayDeque<>();
     private Tree<UUID, PersistentVector<T>> history;
+    HashSet<Integer> indexesInsertion;
+    int indexDeletion;
+    PersistentVector<T> oldVector;
+    UUID currentVersion;
+    UUID previousVersion;
     Tree<UUID, PersistentVector<T>>.Node node;
 
     public UndoRedoPersistentVector() {
