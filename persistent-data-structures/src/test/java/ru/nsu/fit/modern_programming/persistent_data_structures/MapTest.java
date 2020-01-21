@@ -17,5 +17,13 @@ public class MapTest {
         Assert.assertEquals("Zero", map.get(0));
     }
 
+    @Test
+    public void testRewrite() {
+        PersistentMap<Integer, String> map = new PersistentMap<>();
 
+        map = map.put(0, "0");
+        map = map.put(0, "00");
+
+        System.out.println(map.get(0));
+    }
 }
