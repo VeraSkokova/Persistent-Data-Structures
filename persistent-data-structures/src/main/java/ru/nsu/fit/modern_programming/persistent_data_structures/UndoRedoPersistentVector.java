@@ -5,9 +5,15 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.trie.PersistentB
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class UndoRedoPersistentVector<T> extends PersistentVector<T> implements UndoRedo {
+    public HashSet<Integer> indexesInsertion;
+    public int indexDeletion;
+    public PersistentVector<T> oldVector;
+    UUID currentVersion;
+    UUID previousVersion;
     private Deque<Tree<UUID, PersistentVector<T>>.Node> redoStack = new ArrayDeque<>();
     private Tree<UUID, PersistentVector<T>> history;
     Tree<UUID, PersistentVector<T>>.Node node;
@@ -26,6 +32,7 @@ public class UndoRedoPersistentVector<T> extends PersistentVector<T> implements 
         }
         redoStack.push(node);
         node = node.getParent();
+        currentVersion = node.getKey();
 
         return this;
     }
@@ -36,6 +43,7 @@ public class UndoRedoPersistentVector<T> extends PersistentVector<T> implements 
             return this;
         }
         node = redoStack.pop();
+        currentVersion = node.getKey();
 
         return this;
     }

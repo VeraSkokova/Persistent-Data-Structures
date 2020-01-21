@@ -5,9 +5,15 @@ import ru.nsu.fit.modern_programming.persistent_data_structures.tree.Tree;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class UndoRedoPersistentMap<K extends Comparable<K>, V> extends PersistentMap<K, V> implements UndoRedo{
+    public UUID previousVersion;
+    public UUID currentVersion;
+    public HashSet<K> keysChange;
+    PersistentMap<K, V> oldMap;
+
     private Deque<Tree<UUID, PersistentMap<K, V>>.Node> redoStack = new ArrayDeque<>();
     private Tree<UUID, PersistentMap<K, V>> history;
     Tree<UUID, PersistentMap<K, V>>.Node node;
@@ -26,6 +32,7 @@ public class UndoRedoPersistentMap<K extends Comparable<K>, V> extends Persisten
         }
         redoStack.push(node);
         node = node.getParent();
+        currentVersion = node.getKey();
 
         return this;
     }
