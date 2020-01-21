@@ -9,7 +9,7 @@ public class VectorTest {
         PersistentVector<Integer> vector = new PersistentVector<>();
 
         for (int i = 0; i < 1024 * 1024 + 1; i++) {
-            vector.add(i, i);
+            vector = vector.add(i, i);
         }
 
         for (int i = 0; i < 1024 * 1024 + 1; i++) {
@@ -47,10 +47,10 @@ public class VectorTest {
         PersistentVector<Integer> vector = new PersistentVector<>();
 
         for (int i = 0; i < 128; i++) {
-            vector.add(i, i);
+            vector = vector.add(i, i);
         }
 
-        vector.remove(69);
+        vector = vector.remove(69);
 
         for (int i = 0; i < 69; i++) {
             Assert.assertEquals(i, vector.get(i).intValue());
