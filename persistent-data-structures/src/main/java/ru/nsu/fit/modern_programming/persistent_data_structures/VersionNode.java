@@ -1,19 +1,18 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class VersionNode<T> {
 
     final private VersionNode<T> previousVersion;
 
-    final private T value;
+    private T value;
 
-    final private UUID versionNumber;
+    final private int versionNumber;
 
     private ArrayList<VersionNode> descendants = new ArrayList<>();
 
-    public VersionNode(T value, UUID versionNumber, VersionNode<T> previousVersion) {
+    public VersionNode(T value, int versionNumber, VersionNode<T> previousVersion) {
         this.value = value;
         this.versionNumber = versionNumber;
         this.previousVersion = previousVersion;
@@ -27,7 +26,11 @@ public class VersionNode<T> {
         return value;
     }
 
-    public UUID getVersionNumber() {
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    public int getVersionNumber() {
         return versionNumber;
     }
 
