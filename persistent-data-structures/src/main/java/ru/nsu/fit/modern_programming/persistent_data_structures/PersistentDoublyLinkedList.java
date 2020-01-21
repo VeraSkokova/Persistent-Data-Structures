@@ -6,6 +6,8 @@ import java.util.*;
 
 public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
+    VersionNode<FatNode<E>> versions;
+
     private int size;
 
     private int version;
@@ -17,6 +19,7 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
     private FatNode<E> last;
 
     public PersistentDoublyLinkedList() {
+        versions = new VersionNode<>(null, 0, null);
         maxAvailableVersion = new int[]{0};
     }
 
@@ -34,20 +37,25 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
         first = (FatNode<E>)curr[0];
         last = (FatNode<E>)curr[1];
+
+        versions = new VersionNode<>(first, 0, null);
     }
 
-    private PersistentDoublyLinkedList(int[] maxAvailableVersion, int size, FatNode<E> first, FatNode<E> last) {
+    private PersistentDoublyLinkedList(int[] maxAvailableVersion, int size, FatNode<E> first, FatNode<E> last, VersionNode<FatNode<E>> versions) {
         this.version = maxAvailableVersion[0];
         this.maxAvailableVersion = maxAvailableVersion;
         this.size = size;
         this.first = first;
         this.last = last;
+        this.versions = versions;
     }
 
-    private PersistentDoublyLinkedList(int[] maxAvailableVersion, Collection<E> c) {
+    private PersistentDoublyLinkedList(int[] maxAvailableVersion, Collection<E> c, VersionNode<FatNode<E>> versions) {
         this(c);
         this.version = maxAvailableVersion[0];
         this.maxAvailableVersion = maxAvailableVersion;
+        this.versions = versions;
+        versions.setValue(this.first);
     }
 
     @Override
@@ -60,7 +68,7 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
         FatNode<E> newFirst = null, newLast = null;
         if (index == 0) {
-            if (first.versions.size() == 1) {
+            if (first != null && first.versions.size() == 1) {
                 Node<E> firstNode = first.getNode(version);
                 first.addNode(new Node<E>(newNode, firstNode.item, firstNode.next), newVersion);
                 newNode.getNode(newVersion).next = first;
@@ -73,7 +81,10 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
                     Object[] newArr = new Object[arr.length + 1];
                     newArr[0] = e;
                     System.arraycopy(arr, 0, newArr, 1, arr.length);
-                    return new PersistentDoublyLinkedList<E>(maxAvailableVersion, (Collection)Arrays.asList(newArr));
+
+                    VersionNode<FatNode<E>> newVNode = new VersionNode<>(null, newVersion, this.versions);
+                    this.versions.add(newVNode);
+                    return new PersistentDoublyLinkedList<E>(maxAvailableVersion, (Collection) Arrays.asList(newArr), newVNode);
                 } else {
                     Object[] curr = copy(first, nextNotFull.getNode(version).prev, newVersion);
                     FatNode<E> first = (FatNode<E>) curr[0];
@@ -101,7 +112,10 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
                     Object[] newArr = new Object[arr.length + 1];
                     newArr[newArr.length - 1] = e;
                     System.arraycopy(arr, 0, newArr, 0, arr.length);
-                    return new PersistentDoublyLinkedList<E>(maxAvailableVersion, (Collection)Arrays.asList(newArr));
+
+                    VersionNode<FatNode<E>> newVNode = new VersionNode<>(null, newVersion, this.versions);
+                    this.versions.add(newVNode);
+                    return new PersistentDoublyLinkedList<E>(maxAvailableVersion, (Collection) Arrays.asList(newArr), newVNode);
                 } else {
                     Object[] curr = copy(prevNotFull.getNode(version).next, last, newVersion);
                     FatNode<E> first = (FatNode<E>) curr[0];
@@ -172,7 +186,9 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
         }
 
-        return new PersistentDoublyLinkedList<E>(maxAvailableVersion, size + 1, newFirst, newLast);
+        VersionNode<FatNode<E>> newVNode = new VersionNode<>(newFirst, newVersion, this.versions);
+        this.versions.add(newVNode);
+        return new PersistentDoublyLinkedList<E>(maxAvailableVersion, size + 1, newFirst, newLast, newVNode);
     }
 
     @Override
@@ -250,7 +266,9 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
             rightNode.getNode(newVersion).prev = leftNode;
         }
 
-        return new PersistentDoublyLinkedList<E>(maxAvailableVersion, size - 1, newFirst, newLast);
+        VersionNode<FatNode<E>> newVNode = new VersionNode<>(newFirst, newVersion, this.versions);
+        this.versions.add(newVNode);
+        return new PersistentDoublyLinkedList<E>(maxAvailableVersion, size - 1, newFirst, newLast, newVNode);
     }
 
     @Override
@@ -315,6 +333,7 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
     }
 
     private FatNode<E> getNextNotFull(FatNode<E> start) {
+        if (start == null) return null;
         FatNode<E> node = start;
         while (node.versions.size() != 1) {
             node = node.getNode(version).next;
@@ -326,6 +345,7 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
     }
 
     private FatNode<E> getPrevNotFull(FatNode<E> start) {
+        if (start == null) return null;
         FatNode<E> node = start;
         while (node.versions.size() != 1) {
             node = node.getNode(version).prev;

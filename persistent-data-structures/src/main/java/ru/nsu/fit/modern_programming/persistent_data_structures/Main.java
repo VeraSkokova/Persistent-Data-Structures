@@ -9,6 +9,9 @@ public class Main {
 
         PersistentDoublyLinkedList<Double> list1 = new PersistentDoublyLinkedList<>();
         System.out.println(list1);
+        PersistentDoublyLinkedList<Double> list11 = (PersistentDoublyLinkedList<Double>) list1.add(2.0);
+        System.out.println("list11: " + list11 + " size: " + list11.size());
+
         PersistentDoublyLinkedList<Double> list2 = new PersistentDoublyLinkedList<Double>(List.of(1.2, 2.6, 2.912, -3.56, 130.,-78.55, 0.32, -0.23, 10.22303, -228.7));
         Object[] array = list2.toArray();
         array[0] = -3.14;
@@ -30,7 +33,7 @@ public class Main {
         System.out.println("list5: " + list5 + " size: " + list5.size());
         PersistentDoublyLinkedList<Double> list6 = (PersistentDoublyLinkedList<Double>) list5.remove(5);
         System.out.println("list6: " + list6 + " size: " + list6.size());
-        PersistentDoublyLinkedList<Double> list7 = (PersistentDoublyLinkedList<Double>) list5.remove(5);
+        PersistentDoublyLinkedList<Double> list7 = (PersistentDoublyLinkedList<Double>) list5.remove(1);
         System.out.println("list7: " + list7 + " size: " + list7.size());
         System.out.println("list3: " + list3 + " size: " + list3.size());
         System.out.println("list4: " + list4 + " size: " + list4.size());
