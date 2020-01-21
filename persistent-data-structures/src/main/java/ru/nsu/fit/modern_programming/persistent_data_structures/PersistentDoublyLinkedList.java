@@ -1,6 +1,6 @@
-package ru.nsu.fit.modern_programming.persistent_data_structures.linked_list;
+package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-import ru.nsu.fit.modern_programming.persistent_data_structures.PersistentCollection;
+import ru.nsu.fit.modern_programming.persistent_data_structures.linked_list.PersistentList;
 
 import java.util.*;
 

@@ -1,10 +1,5 @@
 package ru.nsu.fit.modern_programming.persistent_data_structures;
 
-import ru.nsu.fit.modern_programming.persistent_data_structures.avl_tree.AvlTree;
-import ru.nsu.fit.modern_programming.persistent_data_structures.avl_tree.PersistentAvlTree;
-import ru.nsu.fit.modern_programming.persistent_data_structures.linked_list.PersistentDoublyLinkedList;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
