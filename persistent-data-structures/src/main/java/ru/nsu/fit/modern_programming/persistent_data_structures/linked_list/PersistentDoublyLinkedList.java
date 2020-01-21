@@ -10,11 +10,14 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
     private int version;
 
+    private int[] maxAvailableVersion;
+    
     private FatNode<E> first;
 
     private FatNode<E> last;
 
     public PersistentDoublyLinkedList() {
+        maxAvailableVersion = new int[]{0};
     }
 
     public PersistentDoublyLinkedList(Collection<E> c) {
@@ -24,6 +27,7 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
         if (newSize == 0) return;
 
         version = 0;
+        maxAvailableVersion = new int[]{0};
         size = newSize;
 
         Object[] curr = createSequence(a, 0);
@@ -32,29 +36,34 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
         last = (FatNode<E>)curr[1];
     }
 
-    private PersistentDoublyLinkedList(int version, int size, FatNode<E> first, FatNode<E> last) {
-        this.version = version;
+    private PersistentDoublyLinkedList(int[] maxAvailableVersion, int size, FatNode<E> first, FatNode<E> last) {
+        this.version = maxAvailableVersion[0];
+        this.maxAvailableVersion = maxAvailableVersion;
         this.size = size;
         this.first = first;
         this.last = last;
     }
 
-    private PersistentDoublyLinkedList(int version, Collection<E> c) {
+    private PersistentDoublyLinkedList(int[] maxAvailableVersion, Collection<E> c) {
         this(c);
-        this.version = version;
+        this.version = maxAvailableVersion[0];
+        this.maxAvailableVersion = maxAvailableVersion;
     }
 
     @Override
     public PersistentList<E> add(int index, E e) {
+        maxAvailableVersion[0] = maxAvailableVersion[0] + 1;
+        int newVersion = maxAvailableVersion[0];
+        
         FatNode<E> newNode = new FatNode<>();
-        newNode.addNode(new Node<E>(null, e, null), version + 1);
+        newNode.addNode(new Node<E>(null, e, null), newVersion);
 
         FatNode<E> newFirst = null, newLast = null;
         if (index == 0) {
             if (first.versions.size() == 1) {
                 Node<E> firstNode = first.getNode(version);
-                first.addNode(new Node<E>(newNode, firstNode.item, firstNode.next), version + 1);
-                newNode.getNode(version + 1).next = first;
+                first.addNode(new Node<E>(newNode, firstNode.item, firstNode.next), newVersion);
+                newNode.getNode(newVersion).next = first;
                 newFirst = newNode;
                 newLast = last;
             } else {
@@ -64,15 +73,15 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
                     Object[] newArr = new Object[arr.length + 1];
                     newArr[0] = e;
                     System.arraycopy(arr, 0, newArr, 1, arr.length);
-                    return new PersistentDoublyLinkedList<E>(version + 1, (Collection)Arrays.asList(newArr));
+                    return new PersistentDoublyLinkedList<E>(maxAvailableVersion, (Collection)Arrays.asList(newArr));
                 } else {
-                    Object[] curr = copy(first, nextNotFull.getNode(version).prev);
+                    Object[] curr = copy(first, nextNotFull.getNode(version).prev, newVersion);
                     FatNode<E> first = (FatNode<E>) curr[0];
                     FatNode<E> last = (FatNode<E>) curr[1];
-                    newNode.getNode(version + 1).next = first;
-                    first.getNode(version + 1).prev = newNode;
-                    last.getNode(version + 1).next = nextNotFull;
-                    nextNotFull.addNode(new Node<E>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), version + 1);
+                    newNode.getNode(newVersion).next = first;
+                    first.getNode(newVersion).prev = newNode;
+                    last.getNode(newVersion).next = nextNotFull;
+                    nextNotFull.addNode(new Node<E>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), newVersion);
                     newFirst = newNode;
                     newLast = last;
                 }
@@ -81,8 +90,8 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
         else if (index == size) {
             if (last.versions.size() == 1) {
                 Node<E> lastNode = last.getNode(version);
-                last.addNode(new Node<E>(lastNode.prev, lastNode.item, newNode), version + 1);
-                newNode.getNode(version + 1).prev = last;
+                last.addNode(new Node<E>(lastNode.prev, lastNode.item, newNode), newVersion);
+                newNode.getNode(newVersion).prev = last;
                 newFirst = first;
                 newLast = newNode;
             } else {
@@ -92,15 +101,15 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
                     Object[] newArr = new Object[arr.length + 1];
                     newArr[newArr.length - 1] = e;
                     System.arraycopy(arr, 0, newArr, 0, arr.length);
-                    return new PersistentDoublyLinkedList<E>(version + 1, (Collection)Arrays.asList(newArr));
+                    return new PersistentDoublyLinkedList<E>(maxAvailableVersion, (Collection)Arrays.asList(newArr));
                 } else {
-                    Object[] curr = copy(prevNotFull.getNode(version).next, last);
+                    Object[] curr = copy(prevNotFull.getNode(version).next, last, newVersion);
                     FatNode<E> first = (FatNode<E>) curr[0];
                     FatNode<E> last = (FatNode<E>) curr[1];
-                    newNode.getNode(version + 1).prev = last;
-                    first.getNode(version + 1).prev = prevNotFull;
-                    last.getNode(version + 1).next = newNode;
-                    prevNotFull.addNode(new Node<E>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), version + 1);
+                    newNode.getNode(newVersion).prev = last;
+                    first.getNode(newVersion).prev = prevNotFull;
+                    last.getNode(newVersion).next = newNode;
+                    prevNotFull.addNode(new Node<E>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), newVersion);
                     newFirst = first;
                     newLast = newNode;
                 }
@@ -110,60 +119,60 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
             FatNode<E> node = getNode(index);
             FatNode<E> nextNotFull = getNextNotFull(node);
             if (nextNotFull == null) {
-                Object[] curr = copy(node, last);
+                Object[] curr = copy(node, last, newVersion);
                 FatNode<E> first = (FatNode<E>) curr[0];
                 FatNode<E> last = (FatNode<E>) curr[1];
-                newNode.getNode(version + 1).next = first;
-                first.getNode(version + 1).prev = newNode;
+                newNode.getNode(newVersion).next = first;
+                first.getNode(newVersion).prev = newNode;
                 newLast = last;
             }
             else {
                 if (nextNotFull == node) {
-                    node.addNode(new Node<>(newNode, node.getNode(version).item, node.getNode(version).next), version + 1);
-                    newNode.getNode(version + 1).next = node;
+                    node.addNode(new Node<>(newNode, node.getNode(version).item, node.getNode(version).next), newVersion);
+                    newNode.getNode(newVersion).next = node;
                 }
                 else {
-                    Object[] curr = copy(node, nextNotFull.getNode(version).prev);
+                    Object[] curr = copy(node, nextNotFull.getNode(version).prev, newVersion);
                     FatNode<E> first = (FatNode<E>) curr[0];
                     FatNode<E> last = (FatNode<E>) curr[1];
-                    newNode.getNode(version + 1).next = first;
-                    first.getNode(version + 1).prev = newNode;
-                    last.getNode(version + 1).next = nextNotFull;
-                    nextNotFull.addNode(new Node<>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), version + 1);
+                    newNode.getNode(newVersion).next = first;
+                    first.getNode(newVersion).prev = newNode;
+                    last.getNode(newVersion).next = nextNotFull;
+                    nextNotFull.addNode(new Node<>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), newVersion);
                 }
                 newLast = last;
             }
 
             FatNode<E> prevNotFull = getPrevNotFull(node.getNode(version).prev);
             if (prevNotFull == null) {
-                Object[] curr = copy(first, node.getNode(version).prev);
+                Object[] curr = copy(first, node.getNode(version).prev, newVersion);
                 FatNode<E> first = (FatNode<E>) curr[0];
                 FatNode<E> last = (FatNode<E>) curr[1];
-                newNode.getNode(version + 1).prev = last;
-                last.getNode(version + 1).next = newNode;
+                newNode.getNode(newVersion).prev = last;
+                last.getNode(newVersion).next = newNode;
                 newFirst = first;
             }
             else {
                 if (prevNotFull == node.getNode(version).prev) {
                     FatNode<E> prev = node.getNode(version).prev;
-                    prev.addNode(new Node<>(prev.getNode(version).prev, prev.getNode(version).item, newNode), version + 1);
-                    newNode.getNode(version + 1).prev = prev;
+                    prev.addNode(new Node<>(prev.getNode(version).prev, prev.getNode(version).item, newNode), newVersion);
+                    newNode.getNode(newVersion).prev = prev;
                 }
                 else {
-                    Object[] curr = copy(prevNotFull.getNode(version).next, node.getNode(version).prev);
+                    Object[] curr = copy(prevNotFull.getNode(version).next, node.getNode(version).prev, newVersion);
                     FatNode<E> first = (FatNode<E>) curr[0];
                     FatNode<E> last = (FatNode<E>) curr[1];
-                    newNode.getNode(version + 1).prev = last;
-                    first.getNode(version + 1).prev = prevNotFull;
-                    last.getNode(version + 1).next = newNode;
-                    prevNotFull.addNode(new Node<>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), version + 1);
+                    newNode.getNode(newVersion).prev = last;
+                    first.getNode(newVersion).prev = prevNotFull;
+                    last.getNode(newVersion).next = newNode;
+                    prevNotFull.addNode(new Node<>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), newVersion);
                 }
                 newFirst = first;
             }
 
         }
 
-        return new PersistentDoublyLinkedList<E>(version + 1, size + 1, newFirst, newLast);
+        return new PersistentDoublyLinkedList<E>(maxAvailableVersion, size + 1, newFirst, newLast);
     }
 
     @Override
@@ -177,13 +186,16 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
 
     @Override
     public PersistentList<E> remove(int index) {
+        maxAvailableVersion[0] = maxAvailableVersion[0] + 1;
+        int newVersion = maxAvailableVersion[0];
+        
         FatNode<E> newFirst = null, newLast = null, leftNode = null, rightNode = null;
         FatNode<E> node = getNode(index);
 
         FatNode<E> nextNotFull = getNextNotFull(node.getNode(version).next);
 
         if (nextNotFull == null) {
-            Object[] curr = copy(node.getNode(version).next, last);
+            Object[] curr = copy(node.getNode(version).next, last, newVersion);
             rightNode = (FatNode<E>) curr[0];
             newLast = (FatNode<E>) curr[1];
         }
@@ -192,11 +204,11 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
                 rightNode = nextNotFull;
             }
             else {
-                Object[] curr = copy(node.getNode(version).next, nextNotFull.getNode(version).prev);
+                Object[] curr = copy(node.getNode(version).next, nextNotFull.getNode(version).prev, newVersion);
                 FatNode<E> first = (FatNode<E>) curr[0];
                 FatNode<E> last = (FatNode<E>) curr[1];
-                last.getNode(version + 1).next = nextNotFull;
-                nextNotFull.addNode(new Node<>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), version + 1);
+                last.getNode(newVersion).next = nextNotFull;
+                nextNotFull.addNode(new Node<>(last, nextNotFull.getNode(version).item, nextNotFull.getNode(version).next), newVersion);
                 rightNode = first;
             }
             newLast = last;
@@ -205,7 +217,7 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
         FatNode<E> prevNotFull = getPrevNotFull(node.getNode(version).prev);
 
         if (prevNotFull == null) {
-            Object[] curr = copy(first, node.getNode(version).prev);
+            Object[] curr = copy(first, node.getNode(version).prev, newVersion);
             leftNode = (FatNode<E>) curr[1];
             newFirst = (FatNode<E>) curr[0];
         }
@@ -214,31 +226,31 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
                 leftNode = prevNotFull;
             }
             else {
-                Object[] curr = copy(prevNotFull.getNode(version).next, node.getNode(version).prev);
+                Object[] curr = copy(prevNotFull.getNode(version).next, node.getNode(version).prev, newVersion);
                 FatNode<E> first = (FatNode<E>) curr[0];
                 FatNode<E> last = (FatNode<E>) curr[1];
-                first.getNode(version + 1).prev = prevNotFull;
-                prevNotFull.addNode(new Node<>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), version + 1);
+                first.getNode(newVersion).prev = prevNotFull;
+                prevNotFull.addNode(new Node<>(prevNotFull.getNode(version).prev, prevNotFull.getNode(version).item, first), newVersion);
                 leftNode = last;
             }
             newFirst = first;
         }
 
-        if (!leftNode.versions.containsKey(version + 1)) {
-            leftNode.addNode(new Node<>(leftNode.getNode(version).prev, leftNode.getNode(version).item, rightNode), version + 1);
+        if (!leftNode.versions.containsKey(newVersion)) {
+            leftNode.addNode(new Node<>(leftNode.getNode(version).prev, leftNode.getNode(version).item, rightNode), newVersion);
         }
         else {
-            leftNode.getNode(version + 1).next = rightNode;
+            leftNode.getNode(newVersion).next = rightNode;
         }
 
-        if (!rightNode.versions.containsKey(version + 1)) {
-            rightNode.addNode(new Node<>(leftNode, rightNode.getNode(version).item, rightNode.getNode(version).next), version + 1);
+        if (!rightNode.versions.containsKey(newVersion)) {
+            rightNode.addNode(new Node<>(leftNode, rightNode.getNode(version).item, rightNode.getNode(version).next), newVersion);
         }
         else {
-            rightNode.getNode(version + 1).prev = leftNode;
+            rightNode.getNode(newVersion).prev = leftNode;
         }
 
-        return new PersistentDoublyLinkedList<E>(version + 1, size - 1, newFirst, newLast);
+        return new PersistentDoublyLinkedList<E>(maxAvailableVersion, size - 1, newFirst, newLast);
     }
 
     @Override
@@ -324,8 +336,8 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
         return node;
     }
 
-    private Object[] copy(FatNode<E> start, FatNode<E> end) {
-        return createSequence(toArray(start, end), version + 1);
+    private Object[] copy(FatNode<E> start, FatNode<E> end, int version) {
+        return createSequence(toArray(start, end), version);
     }
 
     private Object[] createSequence(Object[] items, int version) {
@@ -353,30 +365,27 @@ public class PersistentDoublyLinkedList<E> implements PersistentList<E> {
         return sequence;
     }
 
-//    private void unlink(Node<E> node) {
-//        node.next = null;
-//        node.item = null;
-//        node.prev = null;
-//    }
-
     private static class FatNode<E> {
 
         private Map<Integer, Node<E>> versions = new HashMap<>();
 
         Node<E> getNode(int version) {
-            return versions.getOrDefault(version, getLastNode());
+            return versions.getOrDefault(version, getLastAvailableNode(version));
         }
 
         void addNode(Node<E> node, int version) {
             versions.put(version, node);
         }
 
-        private Node<E> getLastNode() {
-            Object[] arr = versions.keySet().toArray();
-            if (arr.length == 1) {
-                return versions.get((Integer) arr[0]);
-            }
-            return versions.get(Math.max((Integer) arr[0], (Integer) arr[1]));
+        private Node<E> getLastAvailableNode(int version) {
+            int[] availableVersion = new int[1];
+            versions.forEach((k, v) -> {
+                if (k <= version) {
+                    availableVersion[0] = k;
+                }
+            });
+
+            return versions.get(availableVersion[0]);
         }
 
     }
